@@ -8,7 +8,7 @@ namespace Burrows_Wheeler
 {
     public class mos2vsort
     {
-        public void QuickSort(string[] suffix, int low, int high)
+        public static void QuickSort(string[] suffix, int low, int high)
         {
             if (low < high) 
             {
@@ -20,7 +20,7 @@ namespace Burrows_Wheeler
             }
         }
 
-        public int Partition(string[] suffix, int low, int high)
+        public static int Partition(string[] suffix, int low, int high)
         {
             string pivot = suffix[high];
 
@@ -42,7 +42,7 @@ namespace Burrows_Wheeler
             return k + 1;
         }
 
-        public void Swap(string[] suffix, int k, int i)
+        public static void Swap(string[] suffix, int k, int i)
         {
             string tmp = suffix[k];
             suffix[k] = suffix[i];

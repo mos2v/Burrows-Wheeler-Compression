@@ -15,7 +15,7 @@ namespace Burrows_Wheelerv2
             Console.WriteLine("Original Text: " + txt);
             List<string> suffixies = GenerateSuffixies(txt);
             string[] suffix = new string[length];
-            QuickSort(suffix, 0, length - 1);
+            mos2vsort.QuickSort(suffix, 0, length - 1);
             char[] transform = new char[txt.Length];
             for (int i = 0; i < txt.Length; i++)
             {
