@@ -11,10 +11,11 @@ namespace Burrows_Wheelerv2
     {
         public static string Burrows(string txt, char a)
         {
+            int length = txt.Length;
             Console.WriteLine("Original Text: " + txt);
             List<string> suffixies = GenerateSuffixies(txt);
-
-            mos2vTimsort.Sort(suffixies);
+            string[] suffix = new string[length];
+            QuickSort(suffix, 0, length - 1);
             char[] transform = new char[txt.Length];
             for (int i = 0; i < txt.Length; i++)
             {
