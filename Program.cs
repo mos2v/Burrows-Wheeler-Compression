@@ -9,102 +9,98 @@ namespace Burrows_Wheelerv2
 {
     internal class Program
     {
-        public static string Burrows(string txt, char a)
+        public static string Burrows(string txt)
         {
             int length = txt.Length;
             Console.WriteLine("Original Text: " + txt);
-            List<string> suffixies = GenerateSuffixies(txt);
-            string[] suffix = new string[length];
-            mos2vsort.QuickSort(suffix, 0, length - 1);
+            int[] suffixies = new int[txt.Length];
+            for (int i = 0; i < length; i++)
+            {
+                suffixies[i] = i;
+            }
+            //Array.Sort(suffixies);
+            mos2vsort.QuickSort(suffixies, txt);
             char[] transform = new char[txt.Length];
             for (int i = 0; i < txt.Length; i++)
             {
-                transform[i] = suffixies[i][txt.Length - 1];
+                int suffix_indx = suffixies[i];
+                transform[i] = txt[(suffix_indx + length - 1) % length];
             }
 
             string bwt = new string(transform);
-            Console.WriteLine("BWT: " + bwt);
 
-            int[] next = ConstructNextArray(bwt);
-
-            int originalIndex = suffixies.IndexOf(txt);
-
-            string decodedText = Decode(bwt, next, originalIndex);
-            //Console.WriteLine("Decoded Text: " + decodedText);
-            
-            if (a == 'E')
-            {
-                return new string(transform);
-            }
-            else
-            {
-                return decodedText;
-            }
+         
+            Console.WriteLine("Decoded Text: " + bwt);
+            return bwt;
         }
-
-        public static List<string> GenerateSuffixies(string txt)
+        public static string Burrows_Inverse(string txt) 
         {
-            List<string> rotations = new List<string>();
-            for (int i = 0; i < txt.Length; i++)
-            {
-                string rotation = txt.Substring(i) + txt.Substring(0, i);
-                rotations.Add(rotation);
-            }
-            return rotations;
-        }
+            string bwt = "fdafcaaaabb";
 
-        public static int[] ConstructNextArray(string bwt)
-        {
             int length = bwt.Length;
-            int[] next = new int[length];
-            int[] count = new int[256];
-            int[] rank = new int[length];
-
-            foreach (char c in bwt)
+            // Step 1: Create the first column by sorting the BWT string
+            int[] indices = new int[length];
+            for (int i = 0; i < length; i++)
             {
-                count[c]++;
+                indices[i] = i;
             }
 
-            int sum = 0;
-            for (int i = 0; i < 256; i++)
+            mos2vsort.QuickSort(indices, bwt);
+
+            // Create the first column from the sorted indices
+            char[] firstColumn = new char[length];
+            for (int i = 0; i < length; i++)
             {
-                int temp = count[i];
-                count[i] = sum;
-                sum += temp;
+                firstColumn[i] = bwt[indices[i]];
+            }
+
+            // Step 2: Build the LF mapping
+            int[] lfMapping = new int[length];
+            Dictionary<char, Queue<int>> charToPositions = new Dictionary<char, Queue<int>>();
+
+            for (int i = 0; i < length; i++)
+            {
+                if (!charToPositions.ContainsKey(firstColumn[i]))
+                {
+                    charToPositions[firstColumn[i]] = new Queue<int>();
+                }
+                charToPositions[firstColumn[i]].Enqueue(i);
             }
 
             for (int i = 0; i < length; i++)
             {
-                rank[i] = count[bwt[i]];
-                count[bwt[i]]++;
+                char c = bwt[i];
+                lfMapping[i] = charToPositions[c].Dequeue();
             }
 
-            for (int i = 0; i < length; i++)
+            // Step 3: Reconstruct the original string
+            char[] original = new char[length];
+            int row = 2; // Start at the smallest index if '$' is not present
+
+            // Find the row with '$' or use the smallest index if no '$' is present
+            if (bwt.Contains('$'))
             {
-                next[rank[i]] = i;
+                for (int i = 0; i < length; i++)
+                {
+                    if (bwt[i] == '$')
+                    {
+                        row = i;
+                        break;
+                    }
+                }
             }
 
-            return next;
+            // Reconstruction
+            for (int i = length - 1; i >= 0; i--)
+            {
+                original[i] = bwt[row];
+                row = lfMapping[row];
+            }
+
+
+            return new string(original);
+
         }
-
-        public static string Decode(string bwt, int[] next, int originalIndex)
-        {
-            int length = bwt.Length;
-            char[] originalOrder = new char[length];
-            int index = originalIndex;
-
-            for (int i = 0; i < length; i++)
-            {
-                originalOrder[i] = bwt[index];
-                index = next[index];
-            }
-
-            string decodedText = new string(originalOrder);
-            decodedText = decodedText.Substring(1) + decodedText[0];
-            return decodedText;
-        }
-
-
         public static byte[] moveToFront(string text)
         {
             
@@ -122,12 +118,10 @@ namespace Burrows_Wheelerv2
                 extendedAsciiSymbols.Insert(0, a);
             }
 
-            //for (int i = 0; i < position.Length; i++)
-            //    Console.WriteLine(position[i]);
 
             return position;
         }
-        public static string decode(byte[] pos)
+        public static string moveToFront_inverse(byte[] pos)
         {
             int length = pos.Length;
             StringBuilder decoded = new StringBuilder();
@@ -155,10 +149,8 @@ namespace Burrows_Wheelerv2
             return extendedAsciiSymbols;
         }
 
-        public class HuffmanCoding
+        public static Node Huffman_encoding(byte[] integers)
         {
-            public static Node Huffman_encoding(byte[] integers)
-            {
                 //byte[] integers = { 97, 98, 0, 0, 1, 0, 1, 0, 0, 0, 1, 99, 0, 1, 2, 0, 1, 0, 0, 1, 2 };
 
                 byte[] unique_val = integers.Distinct().ToArray();
@@ -191,8 +183,8 @@ namespace Burrows_Wheelerv2
                 }
                 while (pq.Count > 1)
                 {
-                    Node Y = pq.Dequeue();
                     Node X = pq.Dequeue();
+                    Node Y = pq.Dequeue();
 
                     Node mergednode = new Node();
                     mergednode.Value = -1;
@@ -205,15 +197,9 @@ namespace Burrows_Wheelerv2
                 return root;
 
             }
-            private Dictionary<int, string> huffmanCodes;
-
-            public HuffmanCoding()
-            {
-                huffmanCodes = new Dictionary<int, string>();
-            }
-
             public Dictionary<int, string> GenerateHuffmanCodes(Node root)
             {
+            Dictionary <int, string> huffmanCodes = new Dictionary<int, string>();
                 if (root == null)
                     return huffmanCodes;
 
@@ -231,7 +217,7 @@ namespace Burrows_Wheelerv2
                 if (node.Value != -1)
                 {
 
-                    huffmanCodes[node.Value] = code;
+                    //huffmanCodes[node.Value] = code;
                 }
                 //Console.WriteLine("node val");
                 //Console.WriteLine(node.Value);
@@ -244,102 +230,15 @@ namespace Burrows_Wheelerv2
                 TraverseTree(node.left, code + "0");
                 TraverseTree(node.right, code + "1");
             }
-            public string encode(byte[] a)
-            {
-                StringBuilder e = new StringBuilder();
-                foreach (int c in a) 
-                {
-                    e.Append(huffmanCodes[c]);
-                }
-                return e.ToString();
-            }
-            public void SerializeTree(Node node, StreamWriter writer)
-            {
-                if (node == null)
-                    return;
-
-                if (node.left == null && node.right == null)
-                {
-                    writer.WriteLine($"L{node.Value}");
-                }
-                else
-                {
-                    writer.WriteLine("I");
-                }
-
-                SerializeTree(node.left, writer);
-                SerializeTree(node.right, writer);
-            }
-
-            public void WriteToFile(Node root, string encodedData, string filePath)
-            {
-                using (StreamWriter writer = new StreamWriter(filePath))
-                {
-                    SerializeTree(root, writer);
-                    writer.WriteLine("DATA");
-                    writer.WriteLine(encodedData);
-                }
-            }
-            public Node DeserializeTree(StreamReader reader)
-            {
-                if (reader.EndOfStream)
-                    return null;
-
-                string line = reader.ReadLine();
-                if (line.StartsWith("L"))
-                {
-                    return new Node { Value = int.Parse(line.Substring(1)) };
-                }
-                else
-                {
-                    Node node = new Node { Value = -1 };
-                    node.left = DeserializeTree(reader);
-                    node.right = DeserializeTree(reader);
-                    return node;
-                }
-            }
-
-            public byte[] Decode(string encodedData, Node root)
-            {
-                List<byte> decoded = new List<byte>();
-                Node current = root;
-                foreach (char bit in encodedData)
-                {
-                    current = (bit == '0') ? current.left : current.right;
-
-                    if (current.left == null && current.right == null)
-                    {
-                        decoded.Add((byte) current.Value);
-                        current = root;
-                    }
-                }
-                return decoded.ToArray();
-            }
-            public string huffman1(byte[] integers)
-        {
-            //HuffmanCoding huff = new HuffmanCoding();
-            Node root = Huffman_encoding(integers);
-            Dictionary<int, string> codes = GenerateHuffmanCodes(root);
-            foreach(var code in codes)
-            {
-                Console.WriteLine($"Character: {code.Key}, Code: {code.Value}");
-            }
-            string s = encode(integers);
-            Console.WriteLine(s);
-            
-
-            string filepath = "D:\\FCIS-2024\\FCIS-3rd-Year\\2nd term\\Algorithm\\Project\\huffman.txt";
-            WriteToFile(root, s, filepath);
-
-            return s;
-        }
-        }
-
-
+           
 
         static void Main(string[] args)
         {
+            string filePath = "C:\\Users\\mos3060ti\\Desktop\\ASU\\Y3\\2nd Term\\Algorithms\\project\\[2] Burrow-Wheeler Compression\\Test Files\\Large Cases\\Large\\dickens.txt";
+            string text = File.ReadAllText(filePath);
+            //string a = Burrows(text);
 
+            Console.WriteLine(Burrows_Inverse("a"));
         }
         public static void ProcessFileContent(string input)
         {
@@ -361,38 +260,6 @@ namespace Burrows_Wheelerv2
             
             
         }
-        public static string lastEncoding(string txt )
-        {
-            string burrowsEncoded = Burrows(txt , 'E');
-            byte[] huffmaninput = moveToFront(burrowsEncoded);
-            HuffmanCoding huff = new HuffmanCoding();
-            string output = huff.huffman1(huffmaninput);
-            return output;
-        }
-        public static string lastDecoding()
-        {
-            // decoding
-            Node root;
-            string data;
-
-            HuffmanCoding huff = new HuffmanCoding();
-            string filePath = "D:\\FCIS-2024\\FCIS-3rd-Year\\2nd term\\Algorithm\\Project\\huffman.txt";
-            using (StreamReader reader = new StreamReader(filePath))
-            {
-                root = huff.DeserializeTree(reader);
-                reader.ReadLine(); // Skip the "DATA" line
-                data = reader.ReadLine();
-            }
-            byte[] decodedd = huff.Decode(data, root);
-            
-            string decoded = decode(decodedd);
-
-            string orig = Burrows(decoded, 'D');
-
-            return orig;
-        }
-
-
-
+     
     }
 }
