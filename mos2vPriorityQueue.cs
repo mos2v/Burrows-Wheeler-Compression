@@ -20,9 +20,6 @@ namespace Burrows_Wheelerv2
         //}
     }
 
-
-
-
     public class mos2vPriorityQueue
     {
         private List<Node> heap;
