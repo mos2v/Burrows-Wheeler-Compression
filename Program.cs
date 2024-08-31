@@ -95,7 +95,6 @@ namespace Burrows_Wheelerv2
             for (int i = 0; i < 256; i++)
             {
                 symbols.Add((char)i);
-                Console.WriteLine(symbols[i]);
             }
 
             // List to store the encoded output
@@ -111,10 +110,7 @@ namespace Burrows_Wheelerv2
                 encoded.Add((byte)index);
 
                 // Move the current character to the front of the list
-                if (index == -1)
-                {
-                    //Console.WriteLine(c);
-                }
+                
                 symbols.RemoveAt(index);
                 
                 symbols.Insert(0, c);
@@ -309,14 +305,11 @@ namespace Burrows_Wheelerv2
         }
         static void Main(string[] args)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Large\\dickens.txt";
-            byte[] fileBytes = File.ReadAllBytes(filePath);
-            //string text = File.ReadAllText(filePath);
-            Encoding encoding = Encoding.GetEncoding(437);
-            string fileContent = encoding.GetString(fileBytes);
+            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Small\\aesop-4copies.txt";
+            string text = File.ReadAllText(filePath, Encoding.Latin1);
+         
 
-            var (bwt, originalRow) = Burrows(fileContent);
+            var (bwt, originalRow) = Burrows(text);
             byte[] integers = moveToFront(bwt);
             Node root = Huffman_encoding(integers);
 
@@ -327,12 +320,10 @@ namespace Burrows_Wheelerv2
             SaveToBinaryFile("C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Output Files\\encodedData.bin", encoded);
 
             byte[] decodedData = DecodeData(encoded, paddingBits, huffmanCodes);
-            //for (int i = 0; i < decodedData.Length; i++) { Console.WriteLine(decodedData[i]); }
             string a = moveToFront_inverse(decodedData);
             string original_txt = Burrows_Inverse(a, originalRow);
-            //Console.WriteLine(original_txt);
             string outputFilePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Output Files\\decodedOutput.txt";
-            File.WriteAllText(outputFilePath, original_txt);
+            File.WriteAllText(outputFilePath, original_txt, Encoding.Latin1);
 
         }
 
