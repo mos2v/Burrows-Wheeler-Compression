@@ -90,34 +90,42 @@ namespace Burrows_Wheelerv2
         public static byte[] moveToFront(string text)
         {
 
-            // Initialize the list with all ASCII characters (0-255)
-            List<char> symbols = new List<char>(256);
+            byte[] symbols = new byte[256];
             for (int i = 0; i < 256; i++)
             {
-                symbols.Add((char)i);
+                symbols[i] = (byte)i;
             }
 
-            // List to store the encoded output
-            List<byte> encoded = new List<byte>();
+            byte[] encoded = new byte[text.Length];
 
-            // Iterate over each character in the input string
-            foreach (char c in text)
+            for (int i = 0; i < text.Length; i++)
             {
+                byte c = (byte)text[i];
+                int index = 0;
+
                 // Find the index of the current character
-                int index = symbols.IndexOf(c);
+                while (index < 256 && symbols[index] != c)
+                {
+                    index++;
+                }
 
-                // Add the index to the encoded output as a byte
-                encoded.Add((byte)index);
+                // Add the index to the encoded output
+                encoded[i] = (byte)index;
 
-                // Move the current character to the front of the list
-                
-                symbols.RemoveAt(index);
-                
-                symbols.Insert(0, c);
+                // Move the current character to the front
+                if (index > 0)
+                {
+                    byte temp = symbols[index];
+                    Array.Copy(symbols, 0, symbols, 1, index);
+                    symbols[0] = temp;
+                }
+
+                // Debugging output
+                //Console.WriteLine($"Character: {(char)c}, Index: {index}");
+                //Console.WriteLine($"Symbol table: {string.Join(", ", symbols.Take(10).Select(b => (char)b))}...");
             }
 
-            // Convert the List<byte> to an array of bytes and return
-            return encoded.ToArray();
+            return encoded;
         }
         public static string moveToFront_inverse(byte[] pos)
         {
@@ -305,9 +313,9 @@ namespace Burrows_Wheelerv2
         }
         static void Main(string[] args)
         {
-            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Small\\aesop-4copies.txt";
+            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Large\\dickens.txt";
             string text = File.ReadAllText(filePath, Encoding.Latin1);
-         
+
 
             var (bwt, originalRow) = Burrows(text);
             byte[] integers = moveToFront(bwt);
