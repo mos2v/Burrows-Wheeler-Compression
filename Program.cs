@@ -151,16 +151,6 @@ namespace Burrows_Wheelerv2
             return new string(decoded);
         }
 
-        public static List<char> getAsciiSymbols()
-        {
-            List<char> extendedAsciiSymbols = new List<char>();
-            for (int i = 0; i < 256; i++)
-            {
-                extendedAsciiSymbols.Add((char)i);
-            }
-            return extendedAsciiSymbols;
-        }
-
         public static Node Huffman_encoding(byte[] integers)
         {
 
@@ -313,7 +303,7 @@ namespace Burrows_Wheelerv2
         }
         static void Main(string[] args)
         {
-            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Large\\dickens.txt";
+            string filePath = "C:\\Users\\mos3060ti\\Desktop\\Burrows-Wheeler-Compression\\Test Files\\Large Cases\\Large\\pi-10million.txt";
             string text = File.ReadAllText(filePath, Encoding.Latin1);
 
 
